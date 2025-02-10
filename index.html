@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayang's Deadline Motivator</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            background-image: 
+                linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
+                linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
+                linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
+            background-size: 20px 20px;
+        }
+
+        .container {
+            position: relative;
+            width: 80%;
+            max-width: 600px;
+            margin: 20px;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 15px rgba(255,0,0,0.3);
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #800000);
+            transition: width 0.3s ease;
+        }
+
+        .grim-reaper {
+            position: absolute;
+            top: -50px;
+            left: 0;
+            width: 60px;
+            transform: translateX(-50%);
+            transition: left 0.3s ease;
+            cursor: pointer;
+        }
+
+        .desk-scene {
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .student-gif {
+            width: 150px;
+            margin-top: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255,0,0,0.5);
+            text-align: center;
+            z-index: 100;
+            max-width: 90%;
+        }
+
+        .modal h2 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+        }
+
+        .modal p {
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        button {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.3s;
+        }
+
+        button:hover {
+            background: #ff0000;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+            
+            .grim-reaper {
+                width: 40px;
+                top: -40px;
+            }
+            
+            .student-gif {
+                width: 100px;
+            }
+            
+            .modal {
+                font-size: 14px;
+            }
+        }
+
+        .grim-reaper:hover {
+            animation: float 2s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, -5px); }
+            50% { transform: translate(-50%, 5px); }
+        }
+
+        .poem {
+            background: #3a3a3a;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://media.tenor.com/UhxkK_DAKW4AAAAj/dhayamani.gif" class="grim-reaper" id="reaper">
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div class="desk-scene" id="deskScene">
+            <img src="https://i.pinimg.com/originals/3a/2f/85/3a2f85c6d32a293c2a5b7d7a029a8b2a.gif" class="student-gif">
+        </div>
+    </div>
+    <div class="modal" id="modal">
+        <h2>⏰ Waktunya Berjuang! ⚔️</h2>
+        <div class="poem" id="quoteContent"></div>
+        <button onclick="resetLoader()">Lanjutkan Perjuangan</button>
+    </div>
+
+    <script>
+        let progress = 0;
+        const progressBar = document.getElementById('progress');
+        const reaper = document.getElementById('reaper');
+        const modal = document.getElementById('modal');
+        const deskScene = document.getElementById('deskScene');
+        let quoteIndex = 0;
+
+        const quotes = [
+            `"Malam ini kita bukan hanya bertarung melawan deadline,<br> 
+            tapi juga melawan kantuk yang tak pernah absen...<br>
+            <span style='color:#ff6b6b'>⚡✍️⚡</span>"`,
+            
+            `"Seperti kopi yang tak pernah protes dihajar seduh,<br>
+            kau pun harus tetap bertahan meski tugas menumpuk!<br>
+            <span style='color:#ff6b6b'>☕📚</span>"`,
+            
+            `"Batas waktu hanyalah ilusi,<br>
+            yang nyata hanyalah dosen yang galak<br>
+            dan mata merah karena begadang!<br>
+            <span style='color:#ff6b6b'>😴🔥</span>"`,
+            
+            `"Jangan menyerah!<br>
+            Kecuali kamu punya cadangan kopi<br>
+            yang siap berkorban untuk malam ini...<br>
+            <span style='color:#ff6b6b'>💪☕</span>"`,
+            
+            `"Di balik layar laptop yang redup,<br> 
+            tersimpan cerita tentang pahlawan tanpa jubah<br>
+            yang bertarung melawan template PowerPoint!<br>
+            <span style='color:#ff6b6b'>🦸💻</span>"`,
+            
+            `"Matahari boleh saja tidur,<br>
+            tapi kita? Kita harus tetap terjaga<br>
+            menemani deret tugas yang tak pernah kompromi!<br>
+            <span style='color:#ff6b6b'>🌙📖</span>"`
+        ];
+
+        function showMotivationalQuote() {
+            document.getElementById("quoteContent").innerHTML = quotes[quoteIndex];
+            quoteIndex = (quoteIndex + 1) % quotes.length;
+        }
+
+        function updateLoader() {
+            progressBar.style.width = progress + '%';
+            reaper.style.left = `calc(${progress}% - 30px)`;
+            
+            if(progress >= 100) {
+                clearInterval(loaderInterval);
+                modal.style.display = 'block';
+                deskScene.style.display = 'block';
+                reaper.style.display = 'none';
+                showMotivationalQuote();
+            }
+        }
+
+        function resetLoader() {
+            progress = 0;
+            modal.style.display = 'none';
+            deskScene.style.display = 'none';
+            reaper.style.display = 'block';
+            loaderInterval = setInterval(() => {
+                progress = Math.min(progress + 1, 100);
+                updateLoader();
+            }, 100);
+        }
+
+        let loaderInterval = setInterval(() => {
+            progress = Math.min(progress + 1, 100);
+            updateLoader();
+        }, 100);
+
+        reaper.addEventListener('click', () => {
+            alert("⚠️ Awas! Aku bukan datang untuk jemput nyawa,\nTapi mengingatkanmu bahwa kopi di gelas sudah dingin! ⚠️");
+        });
+
+        window.addEventListener('resize', () => {
+            progressBar.style.width = progress + '%';
+            reaper.style.left = `calc(${progress}% - 30px)`;
+        });
+    </script>
+</body>
+</html>
